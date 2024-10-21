@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм»
 
-* Студент: [Rom Nosk](https://up.htmlacademy.ru/javascript/33/user/2390201).
-* Наставник: `Неизвестно`.
+* Студент: [Роман Носков](https://up.htmlacademy.ru/javascript/33/user/2390201).
+* Наставник: [Артём Картавый](https://htmlacademy.ru/profile/id942149).
 
 ---
 
