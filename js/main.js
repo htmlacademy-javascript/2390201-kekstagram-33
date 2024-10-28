@@ -116,7 +116,7 @@ const createComment = () => {
 // Функция createPublishedPhoto содаёт объект, описывающий публикуемую фотографию
 const createPublishedPhoto = (photoId) => {
   const commentsArray = [];
-  const commentsNumber = getRandomInteger(0, 5);
+  const commentsNumber = getRandomInteger(0, 30);
   for (let i = 0; i <= commentsNumber; i++) {
     commentsArray[i] = createComment (currentCommentId);
   }
