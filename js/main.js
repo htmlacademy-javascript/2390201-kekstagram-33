@@ -37,6 +37,12 @@
 Имена авторов также должны быть случайными. Набор имён для комментаторов составьте сами. Подставляйте случайное имя в поле name.
  */
 const PHOTOS_QUANTITY = 25;
+const MIN_AVATAR_NUMBER = 1;
+const MAX_AVATAR_NUMBER = 6;
+const MIN_COMMENT_NUMBER = 0;
+const MAX_COMMENT_NUMBER = 30;
+const MIN_LIKES_NUMBER = 15;
+const MAX_LIKES_NUMBER = 200;
 
 const PHOTOS_DESCRIPTIONS = [
   'Пляж отеля',
@@ -89,7 +95,6 @@ const COMMENTATORS_NAMES = [
 ];
 
 let currentCommentId = 0; // Сквозной по всей программе номер комментария к фото
-const publishedPhotos = []; // Массив публикуемых фотографий
 
 //Функция getRandomInteger возвращает случайное целое число в диапазоне от a до b
 const getRandomInteger = (a, b) => {
@@ -107,8 +112,11 @@ const createComment = () => {
   currentCommentId++;
   return {
     id: currentCommentId,
-    avatar: 'img/avatar-' + getRandomInteger(1, 6).toString() + '.svg',
-    message: getRandomArrayElement(COMMENT_MESSAGES),
+    avatar: `img/avatar-${ getRandomInteger(MIN_AVATAR_NUMBER, MAX_AVATAR_NUMBER).toString() }.svg`,
+    // Склеиваем одно или два случайных предложения из COMMENT_MESSAGES для формирования текста комментария
+    message: (getRandomInteger (1, 2) === 1) ?
+      getRandomArrayElement(COMMENT_MESSAGES) :
+      `${getRandomArrayElement(COMMENT_MESSAGES)} ${getRandomArrayElement(COMMENT_MESSAGES)}`,
     name: getRandomArrayElement(COMMENTATORS_NAMES),
   };
 };
@@ -116,24 +124,24 @@ const createComment = () => {
 // Функция createPublishedPhoto содаёт объект, описывающий публикуемую фотографию
 const createPublishedPhoto = (photoId) => {
   const commentsArray = [];
-  const commentsNumber = getRandomInteger(0, 30);
-  for (let i = 0; i <= commentsNumber; i++) {
+  const commentsNumber = getRandomInteger(MIN_COMMENT_NUMBER, MAX_COMMENT_NUMBER);
+  for (let i = 0; i < commentsNumber; i++) {
     commentsArray[i] = createComment (currentCommentId);
   }
 
   return {
     id: photoId,
-    url: 'photos/' + photoId.toString() + '.jpg',
+    url: `photos/${ photoId.toString() }.jpg`,
     description: PHOTOS_DESCRIPTIONS[photoId - 1],
-    likes: getRandomInteger(15, 200),
+    likes: getRandomInteger(MIN_LIKES_NUMBER, MAX_LIKES_NUMBER),
     comments: commentsArray,
   };
 };
 
-// Создаём массив публикуемых фотографий publishedPhotos в котором содержатся фото в количестве PHOTOS_QUANTITY
-for (let i = 1; i <= PHOTOS_QUANTITY; i++) {
-  publishedPhotos[i - 1] = createPublishedPhoto(i);
-}
+//Функция publishedPhotos создаёт массив публикуемых фотографий
+const publishedPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (v, i) => createPublishedPhoto(i + 1));
 
 //Тестовый вывод
-//console.log(publishedPhotos);
+//console.log(publishedPhotos(PHOTOS_QUANTITY));
+
+publishedPhotos(PHOTOS_QUANTITY);
