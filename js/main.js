@@ -37,12 +37,14 @@
 Имена авторов также должны быть случайными. Набор имён для комментаторов составьте сами. Подставляйте случайное имя в поле name.
  */
 const PHOTOS_QUANTITY = 25;
-const MIN_AVATAR_NUMBER = 1;
-const MAX_AVATAR_NUMBER = 6;
-const MIN_COMMENT_NUMBER = 0;
-const MAX_COMMENT_NUMBER = 30;
-const MIN_LIKES_NUMBER = 15;
-const MAX_LIKES_NUMBER = 200;
+const MIN_MAX = {
+  minAvatars : 1,
+  maxAvatars: 6,
+  minComments: 0,
+  maxComments: 30,
+  minLikes: 15,
+  maxLikes: 200,
+};
 
 const PHOTOS_DESCRIPTIONS = [
   'Пляж отеля',
@@ -107,16 +109,23 @@ const getRandomInteger = (a, b) => {
 //Функция getRandomArrayElement возвращает случайноный элемент массива elements
 const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
 
+// Функция createMessage формирует текст к комментарию, склеивая messageNumber случайных предложений из COMMENT_MESSAGES
+const createMessage = (messageNumber) => {
+  let message = '';
+  for (let i = 0; i < messageNumber; i++) {
+    message = `${getRandomArrayElement(COMMENT_MESSAGES)} ${message}`;
+  }
+  return message;
+};
+
 // Функция createComment содаёт объект, описывающий комментарий к фотографии
 const createComment = () => {
   currentCommentId++;
   return {
     id: currentCommentId,
-    avatar: `img/avatar-${ getRandomInteger(MIN_AVATAR_NUMBER, MAX_AVATAR_NUMBER).toString() }.svg`,
-    // Склеиваем одно или два случайных предложения из COMMENT_MESSAGES для формирования текста комментария
-    message: (getRandomInteger (1, 2) === 1) ?
-      getRandomArrayElement(COMMENT_MESSAGES) :
-      `${getRandomArrayElement(COMMENT_MESSAGES)} ${getRandomArrayElement(COMMENT_MESSAGES)}`,
+
+    avatar: `img/avatar-${ getRandomInteger(MIN_MAX.minAvatars, MIN_MAX.maxAvatars).toString() }.svg`,
+    message: createMessage(getRandomInteger (1, 2)),
     name: getRandomArrayElement(COMMENTATORS_NAMES),
   };
 };
@@ -124,7 +133,8 @@ const createComment = () => {
 // Функция createPublishedPhoto содаёт объект, описывающий публикуемую фотографию
 const createPublishedPhoto = (photoId) => {
   const commentsArray = [];
-  const commentsNumber = getRandomInteger(MIN_COMMENT_NUMBER, MAX_COMMENT_NUMBER);
+
+  const commentsNumber = getRandomInteger(MIN_MAX.minComments, MIN_MAX.maxComments);
   for (let i = 0; i < commentsNumber; i++) {
     commentsArray[i] = createComment (currentCommentId);
   }
@@ -133,13 +143,14 @@ const createPublishedPhoto = (photoId) => {
     id: photoId,
     url: `photos/${ photoId.toString() }.jpg`,
     description: PHOTOS_DESCRIPTIONS[photoId - 1],
-    likes: getRandomInteger(MIN_LIKES_NUMBER, MAX_LIKES_NUMBER),
+    likes: getRandomInteger(MIN_MAX.minLikes, MIN_MAX.maxLikes),
     comments: commentsArray,
   };
 };
 
 //Функция publishedPhotos создаёт массив публикуемых фотографий
-const publishedPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (v, i) => createPublishedPhoto(i + 1));
+
+const publishedPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (undefinedValue, photoCounter) => createPublishedPhoto(photoCounter + 1));
 
 //Тестовый вывод
 //console.log(publishedPhotos(PHOTOS_QUANTITY));
