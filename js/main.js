@@ -36,7 +36,6 @@
 
 Имена авторов также должны быть случайными. Набор имён для комментаторов составьте сами. Подставляйте случайное имя в поле name.
  */
-
 const PHOTOS_QUANTITY = 25;
 const MIN_MAX = {
   minAvatars : 1,
@@ -124,6 +123,7 @@ const createComment = () => {
   currentCommentId++;
   return {
     id: currentCommentId,
+
     avatar: `img/avatar-${ getRandomInteger(MIN_MAX.minAvatars, MIN_MAX.maxAvatars).toString() }.svg`,
     message: createMessage(getRandomInteger (1, 2)),
     name: getRandomArrayElement(COMMENTATORS_NAMES),
@@ -133,6 +133,7 @@ const createComment = () => {
 // Функция createPublishedPhoto содаёт объект, описывающий публикуемую фотографию
 const createPublishedPhoto = (photoId) => {
   const commentsArray = [];
+
   const commentsNumber = getRandomInteger(MIN_MAX.minComments, MIN_MAX.maxComments);
   for (let i = 0; i < commentsNumber; i++) {
     commentsArray[i] = createComment (currentCommentId);
@@ -148,6 +149,7 @@ const createPublishedPhoto = (photoId) => {
 };
 
 //Функция publishedPhotos создаёт массив публикуемых фотографий
+
 const publishedPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (undefinedValue, photoCounter) => createPublishedPhoto(photoCounter + 1));
 
 //Тестовый вывод
