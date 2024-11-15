@@ -142,8 +142,8 @@ const createPublishedPhoto = (photoId) => {
   };
 };
 
-//Функция publishedPhotos создаёт массив публикуемых фотографий
+//Функция createPhotos создаёт массив публикуемых фотографий
 
-const publishedPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (undefinedValue, photoCounter) => createPublishedPhoto(photoCounter + 1));
+const createPhotos = (photosQuantity) => Array.from({ length: photosQuantity }, (undefinedValue, photoCounter) => createPublishedPhoto(photoCounter + 1));
 
-export {PHOTOS_QUANTITY, publishedPhotos};
+export {PHOTOS_QUANTITY, createPhotos};
