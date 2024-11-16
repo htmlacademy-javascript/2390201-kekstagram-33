@@ -1,6 +1,6 @@
 // Модуль просмотра изображений
 import {PHOTOS_QUANTITY, createPhotos} from './data.js';
-import {showBigPictureHandler} from './view-big-picture.js';
+import {showBigPictureWindow} from './view-big-picture.js';
 
 const photos = createPhotos(PHOTOS_QUANTITY);
 
@@ -16,18 +16,15 @@ const showThumbnails = () => {
 
   photos.forEach((photo) => {
     const newPicture = newPictureTemplate.cloneNode(true);
-
     const newPictureImage = newPicture.querySelector('.picture__img');
     newPictureImage.src = photo.url;
     newPictureImage.alt = photo.description;
-
-    const newPictureLikes = newPicture.querySelector('.picture__likes');
-    newPictureLikes.textContent = photo.likes;
-
-    const newPictureComments = newPicture.querySelector('.picture__comments');
-    newPictureComments.textContent = photo.comments.length;
-
-    showBigPictureHandler(newPicture, photo);
+    newPicture.querySelector('.picture__likes').textContent = photo.likes;
+    newPicture.querySelector('.picture__comments').textContent = photo.comments.length;
+    //Обработчик клика по миниатюре, который вызывает окно просмотра изображения
+    newPictureImage.addEventListener('click', () => {
+      showBigPictureWindow(photo);
+    });
     picturesFragment.appendChild(newPicture);
   });
 
