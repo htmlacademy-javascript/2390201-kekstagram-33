@@ -7,10 +7,11 @@ const bigPictureLikes = bigPicture.querySelector('.likes-count');
 const bigPictureCloseButton = bigPicture.querySelector('.big-picture__cancel');
 
 const bigPictureComments = bigPicture.querySelector('.social__comments');
-const bigPictureCommentsCount = bigPicture.querySelector('.social__comment-count');
-const commentShownCount = bigPicture.querySelector('.social__comment-shown-count');
-const commentTotalCount = bigPicture.querySelector('.social__comment-total-count');
-const bigPictureCommentsLoader = bigPicture.querySelector('.comments-loader');
+const commentsShownSpan = bigPicture.querySelector('.social__comment-shown-count');
+const commentsTotalSpan = bigPicture.querySelector('.social__comment-total-count');
+const commentsLoaderButton = bigPicture.querySelector('.comments-loader');
+let commentsShownCount = 0;
+const commentsShownPortion = 5; //Сколько комментариев выводим по кнопке "Загрузить ещё"
 
 const commentTemplate = document.querySelector('#comment')
   .content
@@ -32,6 +33,7 @@ const unlockBodyScroll = () =>{
 const closeBigPictureWindow = () => {
   bigPicture.classList.add('hidden');
   bigPictureComments.innerHTML = '';
+  commentsShownCount = 0;
 };
 
 const onDocumentKeyDown = (evt) => {
@@ -51,18 +53,24 @@ bigPictureCloseButton.onclick = () => {
 
 //--- Раздел открытия окна просмотра изображения по клику на миниатюре. Во всех процедурах параметр photo - объект с данными по изображению, соответствующему миниатюре.
 
-const addPictureComments = (photo) => {
-  const commentsCount = photo.comments.length;
-  if (commentsCount !== 0) {
-    commentShownCount.textContent = commentsCount;
-    commentTotalCount.textContent = commentsCount;
+//Загружает на страницу очередную порцию комментариев в количестве commentsShownPortion из массива comments
+const loadCommentsPortion = (comments) => {
+  const commentsLoadTopIndex = commentsShownCount + commentsShownPortion - 1;
+  while ((commentsShownCount < comments.length) && (commentsShownCount <= commentsLoadTopIndex)) {
+    const newComment = commentTemplate.cloneNode(true);
+    newComment.querySelector('.social__picture').src = comments[commentsShownCount].avatar;
+    newComment.querySelector('.social__text').textContent = comments[commentsShownCount].message;
+    bigPictureComments.appendChild(newComment);
+    commentsShownCount++;
+  }
+  commentsShownSpan.textContent = commentsShownCount;
+};
 
-    photo.comments.forEach((comment) => {
-      const newComment = commentTemplate.cloneNode(true);
-      newComment.querySelector('.social__picture').src = comment.avatar;
-      newComment.querySelector('.social__text').textContent = comment.message;
-      bigPictureComments.appendChild(newComment);
-    });
+const addPictureComments = (photo) => {
+  if (photo.comments.length !== 0) {
+    commentsTotalSpan.textContent = photo.comments.length;
+    loadCommentsPortion(photo.comments);
+    commentsLoaderButton.onclick = () => loadCommentsPortion(photo.comments);
   }
 };
 
@@ -73,17 +81,10 @@ const fillBigPicture = (photo) => {
   addPictureComments(photo);
 };
 
-//Требование 4 задания 8.1
-const hideCommentsCountAndLoader = () => {
-  bigPictureCommentsCount.classList.add('hidden');
-  bigPictureCommentsLoader.classList.add('hidden');
-};
-
 //Открытие окна просмотра изображения
 const showBigPictureWindow = (photo) => {
   bigPicture.classList.remove('hidden');
   fillBigPicture(photo);
-  hideCommentsCountAndLoader();
   lockBodyScroll();
   document.addEventListener('keydown', onDocumentKeyDown);
 };

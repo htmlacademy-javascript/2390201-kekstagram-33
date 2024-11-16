@@ -16,11 +16,11 @@ const showThumbnails = () => {
 
   photos.forEach((photo) => {
     const newPicture = newPictureTemplate.cloneNode(true);
+    newPicture.querySelector('.picture__likes').textContent = photo.likes;
+    newPicture.querySelector('.picture__comments').textContent = photo.comments.length;
     const newPictureImage = newPicture.querySelector('.picture__img');
     newPictureImage.src = photo.url;
     newPictureImage.alt = photo.description;
-    newPicture.querySelector('.picture__likes').textContent = photo.likes;
-    newPicture.querySelector('.picture__comments').textContent = photo.comments.length;
     //Обработчик клика по миниатюре, который вызывает окно просмотра изображения
     newPictureImage.addEventListener('click', () => {
       showBigPictureWindow(photo);
