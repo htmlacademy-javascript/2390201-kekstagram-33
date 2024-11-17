@@ -1,4 +1,4 @@
-// Модуль открытия окна просмотра изображения по клику на миниатюре, и закрытия этого окна (задание 8.1)
+// Модуль открытия окна просмотра изображения по клику на миниатюре, и закрытия этого окна (задания 8.14, 8.15)
 
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImage = bigPicture.querySelector('.big-picture__img img');
