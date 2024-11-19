@@ -7,11 +7,13 @@ const bigPictureLikes = bigPicture.querySelector('.likes-count');
 const bigPictureCloseButton = bigPicture.querySelector('.big-picture__cancel');
 
 const bigPictureComments = bigPicture.querySelector('.social__comments');
+const commentsCountDiv = bigPicture.querySelector('.social__comment-count');
 const commentsShownSpan = bigPicture.querySelector('.social__comment-shown-count');
 const commentsTotalSpan = bigPicture.querySelector('.social__comment-total-count');
 const commentsLoaderButton = bigPicture.querySelector('.comments-loader');
 let commentsShownCount = 0;
 const commentsShownPortion = 5; //Сколько комментариев выводим по кнопке "Загрузить ещё"
+let currentPhoto = null; //текущее фото для передачи в обработчик добавления комментариев по кнопке
 
 const commentTemplate = document.querySelector('#comment')
   .content
@@ -29,48 +31,76 @@ const unlockBodyScroll = () =>{
 };
 
 //--- Раздел закрытия окна просмотра изображения
+const removeEventListeners = () => {
+  bigPictureCloseButton.removeEventListener('click', onCloseButtonClick);
+  document.removeEventListener('keydown', onDocumentKeyDown);
+  commentsLoaderButton.removeEventListener('click', loadCommentsPortion);
+};
 
 const closeBigPictureWindow = () => {
   bigPicture.classList.add('hidden');
   bigPictureComments.innerHTML = '';
   commentsShownCount = 0;
+  currentPhoto = null;
+  unlockBodyScroll();
+  removeEventListeners ();
 };
 
-const onDocumentKeyDown = (evt) => {
+function onCloseButtonClick () {
+  closeBigPictureWindow();
+}
+
+function onDocumentKeyDown (evt) {
   if (evt.key === 'Escape') {
     evt.preventDefault();
     closeBigPictureWindow();
-    unlockBodyScroll();
-    document.removeEventListener('keydown', onDocumentKeyDown);
   }
-};
-
-bigPictureCloseButton.onclick = () => {
-  closeBigPictureWindow();
-  unlockBodyScroll();
-  document.removeEventListener('keydown', onDocumentKeyDown);
-};
+}
 
 //--- Раздел открытия окна просмотра изображения по клику на миниатюре. Во всех процедурах параметр photo - объект с данными по изображению, соответствующему миниатюре.
+const hideCommentsCountDiv = () => {
+  commentsCountDiv.classList.add('hidden');
+};
 
-//Загружает на страницу очередную порцию комментариев в количестве commentsShownPortion из массива comments
-const loadCommentsPortion = (comments) => {
+const showCommentsCountDiv = () => {
+  commentsCountDiv.classList.remove('hidden');
+};
+
+const hideCommentsLoaderButton = () =>{
+  commentsLoaderButton.classList.add('hidden');
+};
+
+const showCommentsLoaderButton = () =>{
+  commentsLoaderButton.classList.remove('hidden');
+};
+
+//Загружает на страницу очередную порцию комментариев в количестве commentsShownPortion из массива currentPhoto.comments
+function loadCommentsPortion () {
   const commentsLoadTopIndex = commentsShownCount + commentsShownPortion - 1;
-  while ((commentsShownCount < comments.length) && (commentsShownCount <= commentsLoadTopIndex)) {
+  while ((commentsShownCount < currentPhoto.comments.length) && (commentsShownCount <= commentsLoadTopIndex)) {
     const newComment = commentTemplate.cloneNode(true);
-    newComment.querySelector('.social__picture').src = comments[commentsShownCount].avatar;
-    newComment.querySelector('.social__text').textContent = comments[commentsShownCount].message;
+    newComment.querySelector('.social__picture').src = currentPhoto.comments[commentsShownCount].avatar;
+    newComment.querySelector('.social__text').textContent = currentPhoto.comments[commentsShownCount].message;
     bigPictureComments.appendChild(newComment);
     commentsShownCount++;
   }
+  if (commentsShownCount === currentPhoto.comments.length) {
+    hideCommentsLoaderButton (); //Загрузили все комментарии к фото - скрыли кнопку
+  }
   commentsShownSpan.textContent = commentsShownCount;
-};
+}
 
 const addPictureComments = (photo) => {
-  if (photo.comments.length !== 0) {
-    commentsTotalSpan.textContent = photo.comments.length;
-    loadCommentsPortion(photo.comments);
-    commentsLoaderButton.onclick = () => loadCommentsPortion(photo.comments);
+  currentPhoto = photo;
+  if (currentPhoto.comments.length !== 0) {
+    commentsTotalSpan.textContent = currentPhoto.comments.length;
+    showCommentsCountDiv ();
+    showCommentsLoaderButton ();
+    loadCommentsPortion();
+    commentsLoaderButton.addEventListener('click', loadCommentsPortion);
+  } else {
+    hideCommentsCountDiv ();
+    hideCommentsLoaderButton ();
   }
 };
 
@@ -86,6 +116,7 @@ const showBigPictureWindow = (photo) => {
   bigPicture.classList.remove('hidden');
   fillBigPicture(photo);
   lockBodyScroll();
+  bigPictureCloseButton.addEventListener('click', onCloseButtonClick);
   document.addEventListener('keydown', onDocumentKeyDown);
 };
 
