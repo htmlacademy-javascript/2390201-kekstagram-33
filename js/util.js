@@ -10,4 +10,25 @@ const getRandomInteger = (a, b) => {
 //Функция getRandomArrayElement возвращает случайноный элемент массива elements
 const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
 
-export {getRandomInteger, getRandomArrayElement};
+//Создаёт элемент разметки с тэгом tagName, классом className и текстом text для добавления в DOM через appendChild
+const makeElement = function (tagName, className, text) {
+  const element = document.createElement(tagName);
+  element.classList.add(className);
+  if (text) {
+    element.textContent = text;
+  }
+  return element;
+};
+
+//--- Управление прокруткой контейнера с миниатюрами позади окна изображения
+const keksogramBody = document.querySelector('body');
+//Запрещает прокрутку
+const lockBodyScroll = () =>{
+  keksogramBody.classList.add('modal-open');
+};
+//Разрешает прокрутку
+const unlockBodyScroll = () =>{
+  keksogramBody.classList.remove('modal-open');
+};
+
+export {getRandomInteger, getRandomArrayElement, makeElement, lockBodyScroll, unlockBodyScroll};

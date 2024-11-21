@@ -1,4 +1,5 @@
 // Модуль открытия окна просмотра изображения по клику на миниатюре, и закрытия этого окна (задания 8.14, 8.15)
+import {lockBodyScroll, unlockBodyScroll} from './util.js';
 
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImage = bigPicture.querySelector('.big-picture__img img');
@@ -13,22 +14,11 @@ const commentsTotalSpan = bigPicture.querySelector('.social__comment-total-count
 const commentsLoaderButton = bigPicture.querySelector('.comments-loader');
 let commentsShownCount = 0;
 const commentsShownPortion = 5; //Сколько комментариев выводим по кнопке "Загрузить ещё"
-let currentPhoto = null; //текущее фото для передачи в обработчик добавления комментариев по кнопке
+let currentPhoto = null; //объект с данными по текущему фото для передачи в обработчик добавления комментариев по кнопке
 
 const commentTemplate = document.querySelector('#comment')
   .content
   .querySelector('.social__comment');
-
-//--- Управление прокруткой контейнера с миниатюрами позади окна изображения - требование 5 задания 8.1
-const keksogramBody = document.querySelector('body');
-//Запрещает прокрутку
-const lockBodyScroll = () =>{
-  keksogramBody.classList.add('modal-open');
-};
-//Разрешает прокрутку
-const unlockBodyScroll = () =>{
-  keksogramBody.classList.remove('modal-open');
-};
 
 //--- Раздел закрытия окна просмотра изображения
 const removeEventListeners = () => {
