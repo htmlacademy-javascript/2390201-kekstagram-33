@@ -121,7 +121,7 @@ const setScaleValue = (scaleValue) => {
   } else {
     imageUploadPreview.style.transform = 'scale(1)';
   }
-}
+};
 
 function onScaleSmallerClick () {
   scaleCurrent = scaleCurrent - IMG_SCALE_STEP;
@@ -147,14 +147,10 @@ const addImgScaleListeners = () =>{
 const removeImgScaleListeners = () =>{
   scaleControlSmaller.removeEventListener('click', onScaleSmallerClick);
   scaleControlBigger.removeEventListener('click', onScaleBiggerClick);
-}
-
-//--- Раздел наложения эффектов на изображение
-const showEffectName = (effect) => {
-  return SliderEffects[effect].FILTER_NAME;
 };
 
-noUiSlider.create(effectLevelSlider, {
+//--- Раздел наложения эффектов на изображение
+noUiSlider.create((effectLevelSlider), {
   range: {
     min: 0,
     max: 1,
@@ -179,15 +175,14 @@ const setSliderEffectStyle = (effect, currentValue) => {
   if (effect === 'none') {
     imageUploadPreview.style.filter = '';
   } else {
-  imageUploadPreview.style.filter = `${ SliderEffects[effect].FILTER_NAME }(${ currentValue }${ SliderEffects[effect].FILTER_SUFFIX })`;
+    imageUploadPreview.style.filter = `${ SliderEffects[effect].FILTER_NAME }(${ currentValue }${ SliderEffects[effect].FILTER_SUFFIX })`;
   }
-  console.log(imageUploadPreview.style.filter);
 };
 
 effectLevelSlider.noUiSlider.on('update', () => {
   const sliderValue = effectLevelSlider.noUiSlider.get();
   effectLevelValue.value = sliderValue;
-  setSliderEffectStyle(currentEffect, sliderValue)
+  setSliderEffectStyle(currentEffect, sliderValue);
 });
 
 const setSliderEffectParameters = (effect) => {
@@ -220,7 +215,7 @@ function onEffectButtonClick (evt) {
   if (evt.target.matches('.effects__radio')) {
     changeSliderEffect(evt.target.value);
   }
-};
+}
 
 //--- Раздел закрытия формы добавления изображения
 const removeCloseFormListeners = () => {
