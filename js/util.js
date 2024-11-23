@@ -21,14 +21,13 @@ const makeElement = function (tagName, className, text) {
 };
 
 //--- Управление прокруткой контейнера с миниатюрами позади окна изображения
-const keksogramBody = document.querySelector('body');
 //Запрещает прокрутку
 const lockBodyScroll = () =>{
-  keksogramBody.classList.add('modal-open');
+  document.body.classList.add('modal-open');
 };
 //Разрешает прокрутку
 const unlockBodyScroll = () =>{
-  keksogramBody.classList.remove('modal-open');
+  document.body.classList.remove('modal-open');
 };
 
 export {getRandomInteger, getRandomArrayElement, makeElement, lockBodyScroll, unlockBodyScroll};
