@@ -8,9 +8,8 @@ const imgUploadCancelButton = imgUploadForm.querySelector('.img-upload__cancel')
 
 const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
 const textDescriptionInput = imgUploadForm.querySelector('.text__description');
-const hashtagErrorMessage = '1. Хэштег начинается с символа # (решётка);<br>2. Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д.;<br>3. Хэштеги разделяются пробелами;<br>4. Максимальная длина одного хэштега 20 символов, минимальная - 2 символа, включая решётку;<br>5. Один и тот же хэштег не может быть использован дважды, при этом хэштеги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом;<br>6. нельзя указать больше пяти хэштегов;<br>7. Лишние пробелы при вводе хэштегов будут удалены.';
+let hashtagErrorMessage = '';
 const MAX_HSHTAGS_NUMBER = 5;
-const MAX_HSHTAGS_LENGTH = 20;
 const hashtagTemplate = /^#[a-zа-яё0-9]{1,19}$/i;
 
 const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
@@ -79,7 +78,6 @@ const pristine = new Pristine(imgUploadForm, {
 // Валидатор хэштега для pristine. Возвращает true, если хэштег валиден, false - в противном случае.
 function validateHashtag (value) {
   let hashtagsDuplicate = false;
-  let hashtagTooLong = false;
   let hashtagFormatIsWrong = false;
   //Разделяем строку из поля ввода на массив отдельных хэштегов, удаляя в foreach пустые элементы '', которые образуются из лишних пробелов. Отлавливаем некорректный ввод.
   let hastagsNumber = 0;
@@ -88,22 +86,26 @@ function validateHashtag (value) {
     if (hashtag !== '') {
       if (hashtags.includes(hashtag.toUpperCase())) {
         hashtagsDuplicate = true; //Поймали совпадение хештегов
-      }
-      if (hashtag.length > MAX_HSHTAGS_LENGTH) {
-        hashtagTooLong = true; // Поймали слишком длинный хэштег
+        hashtagErrorMessage = 'Один и тот же хэштег не может быть использован дважды, при этом хэштеги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом';
       }
       if (!hashtagTemplate.test(hashtag)) {
         hashtagFormatIsWrong = true; // Поймали несоответствие шаблону
+        hashtagErrorMessage = 'Хэштег начинается с символа # (решётка). Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д. Минимальная длина хэштега - 2 символа, включая решётку, максимальная - 20';
       }
       hashtags[hastagsNumber] = hashtag.toUpperCase();
       hastagsNumber++;
     }
   });
-  return !((hastagsNumber > MAX_HSHTAGS_NUMBER) || hashtagsDuplicate || hashtagTooLong || hashtagFormatIsWrong);
+  if (hastagsNumber > MAX_HSHTAGS_NUMBER) {
+    hashtagErrorMessage = `Хэштегов не должно быть больше ${ MAX_HSHTAGS_NUMBER }`;
+  }
+  return !((hastagsNumber > MAX_HSHTAGS_NUMBER) || hashtagsDuplicate || hashtagFormatIsWrong);
 }
 
+const hashtagErrorMessageFunction = () => hashtagErrorMessage;
+
 // Валидируем только поле хештега, поле комментариев валидируется на форме в html
-pristine.addValidator(textHashtagsInput, validateHashtag, hashtagErrorMessage);
+pristine.addValidator(textHashtagsInput, validateHashtag, hashtagErrorMessageFunction);
 
 function onImgUploadFormSubmit (evt) {
   evt.preventDefault();
@@ -246,8 +248,10 @@ function onCloseButtonClick () {
 
 function onDocumentKeyDown (evt) {
   if (evt.key === 'Escape') {
-    evt.preventDefault();
-    closeImageEditForm();
+    if (!evt.target.matches('.text__hashtags') && !evt.target.matches('.text__description')) {
+      evt.preventDefault();
+      closeImageEditForm();
+    }
   }
 }
 
