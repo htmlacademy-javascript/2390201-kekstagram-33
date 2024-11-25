@@ -10,7 +10,7 @@ const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
 const textDescriptionInput = imgUploadForm.querySelector('.text__description');
 let hashtagErrorMessage = '';
 const MAX_HSHTAGS_NUMBER = 5;
-const hashtagTemplate = /^#[a-zа-яё0-9]{1,19}$/i;
+const hashtagTemplate = /^#[a-zа-яё0-9]{0,19}$/i;
 
 const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
 const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
@@ -79,6 +79,7 @@ const pristine = new Pristine(imgUploadForm, {
 function validateHashtag (value) {
   let hashtagsDuplicate = false;
   let hashtagFormatIsWrong = false;
+  let onlyHashInHashtag = false;
   //Разделяем строку из поля ввода на массив отдельных хэштегов, удаляя в foreach пустые элементы '', которые образуются из лишних пробелов. Отлавливаем некорректный ввод.
   let hastagsNumber = 0;
   const hashtags = [];
@@ -92,6 +93,10 @@ function validateHashtag (value) {
         hashtagFormatIsWrong = true; // Поймали несоответствие шаблону
         hashtagErrorMessage = 'Хэштег начинается с символа # (решётка). Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д. Минимальная длина хэштега - 2 символа, включая решётку, максимальная - 20';
       }
+      if (hashtag === '#') {
+        onlyHashInHashtag = true;
+        hashtagErrorMessage = 'Хэштег не может состоять только из символа (решётка). Минимальная длина хэштега - 2 символа';
+      }
       hashtags[hastagsNumber] = hashtag.toUpperCase();
       hastagsNumber++;
     }
@@ -99,7 +104,7 @@ function validateHashtag (value) {
   if (hastagsNumber > MAX_HSHTAGS_NUMBER) {
     hashtagErrorMessage = `Хэштегов не должно быть больше ${ MAX_HSHTAGS_NUMBER }`;
   }
-  return !((hastagsNumber > MAX_HSHTAGS_NUMBER) || hashtagsDuplicate || hashtagFormatIsWrong);
+  return !((hastagsNumber > MAX_HSHTAGS_NUMBER) || hashtagsDuplicate || hashtagFormatIsWrong || onlyHashInHashtag);
 }
 
 const hashtagErrorMessageFunction = () => hashtagErrorMessage;
