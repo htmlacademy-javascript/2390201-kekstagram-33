@@ -1,5 +1,7 @@
 // Модуль загрузки изображений, отвечает за работу с формой загрузки (задание 9.1)
 import {lockBodyScroll, unlockBodyScroll} from './util.js';
+import {sendData} from './api.js';
+import {showUploadError} from './user-messages.js';
 
 const imgUploadForm = document.querySelector('.img-upload__form');
 const imgUploadInput = imgUploadForm.querySelector('.img-upload__input');
@@ -9,13 +11,21 @@ const imgUploadCancelButton = imgUploadForm.querySelector('.img-upload__cancel')
 const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
 const textDescriptionInput = imgUploadForm.querySelector('.text__description');
 let hashtagErrorMessage = '';
-const MAX_HSHTAGS_NUMBER = 5;
+const MAX_HASHTAGS_NUMBER = 5;
 const hashtagTemplate = /^#[a-zа-яё0-9]{0,19}$/i;
+const MessagesHashtagError = {
+  DUPLICATE: 'Один и тот же хэштег не может быть использован дважды, при этом хэштеги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом',
+  BAD_FORMAT: 'Хэштег начинается с символа # (решётка). Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д. Минимальная длина хэштега - 2 символа, включая решётку, максимальная - 20',
+  SHORT_HASHTAG: 'Хэштег не может состоять только из символа (решётка). Минимальная длина хэштега - 2 символа',
+  TOO_MANY: `Хэштегов не должно быть больше ${ MAX_HASHTAGS_NUMBER }`
+};
 
 const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
 const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
 const scaleControlValue = imgUploadForm.querySelector('.scale__control--value');
 const imageUploadPreview = imgUploadForm.querySelector('.img-upload__preview img');
+const IMG_SCALE_BOTTOM = 0;
+const IMG_SCALE_TOP = 100;
 const IMG_SCALE_MIN = 25;
 const IMG_SCALE_MAX = 100;
 const IMG_SCALE_DEFAULT = 100;
@@ -68,6 +78,7 @@ const SliderEffects = {
 //--- Раздел валидации и отправки формы
 const pristine = new Pristine(imgUploadForm, {
   classTo: 'img-upload__field-wrapper',
+  // classTo: 'form__error',
   errorClass: 'img-upload__field-wrapper--error',
   // successClass: 'form__item--valid',
   errorTextParent: 'img-upload__field-wrapper',
@@ -87,24 +98,24 @@ function validateHashtag (value) {
     if (hashtag !== '') {
       if (hashtags.includes(hashtag.toUpperCase())) {
         hashtagsDuplicate = true; //Поймали совпадение хештегов
-        hashtagErrorMessage = 'Один и тот же хэштег не может быть использован дважды, при этом хэштеги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом';
+        hashtagErrorMessage = MessagesHashtagError.DUPLICATE;
       }
       if (!hashtagTemplate.test(hashtag)) {
         hashtagFormatIsWrong = true; // Поймали несоответствие шаблону
-        hashtagErrorMessage = 'Хэштег начинается с символа # (решётка). Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д. Минимальная длина хэштега - 2 символа, включая решётку, максимальная - 20';
+        hashtagErrorMessage = MessagesHashtagError.BAD_FORMAT;
       }
       if (hashtag === '#') {
-        onlyHashInHashtag = true;
-        hashtagErrorMessage = 'Хэштег не может состоять только из символа (решётка). Минимальная длина хэштега - 2 символа';
+        onlyHashInHashtag = true; //Хэштег из одной решётки
+        hashtagErrorMessage = MessagesHashtagError.SHORT_HASHTAG;
       }
       hashtags[hastagsNumber] = hashtag.toUpperCase();
       hastagsNumber++;
     }
   });
-  if (hastagsNumber > MAX_HSHTAGS_NUMBER) {
-    hashtagErrorMessage = `Хэштегов не должно быть больше ${ MAX_HSHTAGS_NUMBER }`;
+  if (hastagsNumber > MAX_HASHTAGS_NUMBER) {
+    hashtagErrorMessage = MessagesHashtagError.TOO_MANY;
   }
-  return !((hastagsNumber > MAX_HSHTAGS_NUMBER) || hashtagsDuplicate || hashtagFormatIsWrong || onlyHashInHashtag);
+  return !((hastagsNumber > MAX_HASHTAGS_NUMBER) || hashtagsDuplicate || hashtagFormatIsWrong || onlyHashInHashtag);
 }
 
 const hashtagErrorMessageFunction = () => hashtagErrorMessage;
@@ -115,7 +126,11 @@ pristine.addValidator(textHashtagsInput, validateHashtag, hashtagErrorMessageFun
 function onImgUploadFormSubmit (evt) {
   evt.preventDefault();
   if (pristine.validate()) {
-    imgUploadForm.submit();
+    sendData(new FormData(evt.target))
+      .then(closeImageEditForm)
+      .catch(() => {
+        showUploadError();
+      });
   }
 }
 
@@ -123,7 +138,7 @@ function onImgUploadFormSubmit (evt) {
 const setScaleValue = (scaleValue) => {
   scaleControlValue.value = `${ scaleValue }%`;
 
-  if (scaleValue > 0 && scaleValue < 100) {
+  if (scaleValue > IMG_SCALE_BOTTOM && scaleValue < IMG_SCALE_TOP) {
     imageUploadPreview.style.transform = `scale(0.${ scaleValue })`;
   } else {
     imageUploadPreview.style.transform = 'scale(1)';
@@ -237,7 +252,7 @@ const clearFormInputs = () => {
   imgUploadInput.value = null;
 };
 
-const closeImageEditForm = () => {
+function closeImageEditForm () {
   clearFormInputs ();
   imgUploadOverlay.classList.add('hidden');
   unlockBodyScroll();
@@ -245,7 +260,7 @@ const closeImageEditForm = () => {
   removeImgScaleListeners ();
   effectsList.removeEventListener('click', onEffectButtonClick);
   imgUploadForm.removeEventListener('submit', onImgUploadFormSubmit);
-};
+}
 
 function onCloseButtonClick () {
   closeImageEditForm();
