@@ -33,7 +33,7 @@ const closeBigPictureWindow = () => {
   commentsShownCount = 0;
   currentPhoto = null;
   unlockBodyScroll();
-  removeEventListeners ();
+  removeEventListeners();
 };
 
 function onCloseButtonClick () {

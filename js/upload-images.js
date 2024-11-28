@@ -1,7 +1,7 @@
-// Модуль загрузки изображений, отвечает за работу с формой загрузки (задание 9.1)
+// Модуль загрузки изображений, отвечает за работу с формой загрузки (задания 9.13, 9.15)
 import {lockBodyScroll, unlockBodyScroll} from './util.js';
 import {sendData} from './api.js';
-import {showUploadError} from './user-messages.js';
+import {showUploadError, showUploadSuccess} from './user-messages.js';
 
 const imgUploadForm = document.querySelector('.img-upload__form');
 const imgUploadInput = imgUploadForm.querySelector('.img-upload__input');
@@ -19,6 +19,8 @@ const MessagesHashtagError = {
   SHORT_HASHTAG: 'Хэштег не может состоять только из символа (решётка). Минимальная длина хэштега - 2 символа',
   TOO_MANY: `Хэштегов не должно быть больше ${ MAX_HASHTAGS_NUMBER }`
 };
+const MAX_COMMENT_LENGTH = 140;
+const commentErrorMessage = `Длина комментария не должна быть больше ${ MAX_COMMENT_LENGTH } символов.`;
 
 const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
 const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
@@ -82,10 +84,11 @@ const pristine = new Pristine(imgUploadForm, {
   errorClass: 'img-upload__field-wrapper--error',
   // successClass: 'form__item--valid',
   errorTextParent: 'img-upload__field-wrapper',
-  errorTextTag: 'p',
+  errorTextTag: 'div',
   errorTextClass: 'form__error'
 });
 
+//-- Валидация хэштега
 // Валидатор хэштега для pristine. Возвращает true, если хэштег валиден, false - в противном случае.
 function validateHashtag (value) {
   let hashtagsDuplicate = false;
@@ -120,19 +123,36 @@ function validateHashtag (value) {
 
 const hashtagErrorMessageFunction = () => hashtagErrorMessage;
 
-// Валидируем только поле хештега, поле комментариев валидируется на форме в html
+// Валидируем поле хештега
 pristine.addValidator(textHashtagsInput, validateHashtag, hashtagErrorMessageFunction);
 
+//-- Валидация комментария
+function validateComment (value) {
+  return value.length <= MAX_COMMENT_LENGTH;
+}
+
+pristine.addValidator(textDescriptionInput, validateComment, commentErrorMessage);
+
+// Обработчик отправки формы
 function onImgUploadFormSubmit (evt) {
   evt.preventDefault();
   if (pristine.validate()) {
     sendData(new FormData(evt.target))
-      .then(closeImageEditForm)
+      .then(() => {
+        showUploadSuccess();
+        closeImageEditForm();
+      })
       .catch(() => {
         showUploadError();
       });
   }
 }
+
+//--- Раздел замены изображения "по умолчанию" в разделе превью, на загруженное пользователем.
+// const setNewUploadPreview = () => {
+//   imageUploadPreview.src = imgUploadInput.value;
+//   console.log(imgUploadInput.value);
+// };
 
 //--- Раздел изменения масштаба изображения
 const setScaleValue = (scaleValue) => {
@@ -289,6 +309,7 @@ const addCloseFormListeners = () => {
 function onUploadInputChange () {
   showImageEditForm();
   addCloseFormListeners();
+  // setNewUploadPreview();
   addImgScaleListeners ();
   setScaleValue(IMG_SCALE_DEFAULT);
   changeSliderEffect ('none');
