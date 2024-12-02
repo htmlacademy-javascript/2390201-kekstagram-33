@@ -20,6 +20,24 @@ const makeElement = function (tagName, className, text) {
   return element;
 };
 
+const isEscapeKey = (evt) => evt.key === 'Escape';
+
+// Функция устранения "дребезга" на время timeoutDelay при вызове функции callback
+const debounce = (callback, timeoutDelay) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
+// Определяет, является ли файл картинкой
+const fileIsImage = (fileName) => {
+  const FILE_TYPES = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff'];
+  return FILE_TYPES.some((it) => fileName.endsWith(it));
+};
+
+
 //--- Управление прокруткой контейнера с миниатюрами позади окна изображения
 //Запрещает прокрутку
 const lockBodyScroll = () =>{
@@ -30,4 +48,4 @@ const unlockBodyScroll = () =>{
   document.body.classList.remove('modal-open');
 };
 
-export {getRandomInteger, getRandomArrayElement, makeElement, lockBodyScroll, unlockBodyScroll};
+export {getRandomInteger, getRandomArrayElement, makeElement, isEscapeKey, debounce,fileIsImage, lockBodyScroll, unlockBodyScroll};

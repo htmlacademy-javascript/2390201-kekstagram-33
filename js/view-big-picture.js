@@ -1,5 +1,5 @@
 // Модуль открытия окна просмотра изображения по клику на миниатюре, и закрытия этого окна (задания 8.14, 8.15)
-import {lockBodyScroll, unlockBodyScroll} from './util.js';
+import {isEscapeKey, lockBodyScroll, unlockBodyScroll} from './util.js';
 
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImage = bigPicture.querySelector('.big-picture__img img');
@@ -41,7 +41,7 @@ function onCloseButtonClick () {
 }
 
 function onDocumentKeyDown (evt) {
-  if (evt.key === 'Escape') {
+  if (isEscapeKey(evt)) {
     evt.preventDefault();
     closeBigPictureWindow();
   }

@@ -1,5 +1,5 @@
 // Модуль загрузки изображений, отвечает за работу с формой загрузки (задания 9.13, 9.15)
-import {lockBodyScroll, unlockBodyScroll} from './util.js';
+import {isEscapeKey, fileIsImage, lockBodyScroll, unlockBodyScroll} from './util.js';
 import {sendData} from './api.js';
 import {showUploadError, showUploadSuccess} from './user-messages.js';
 
@@ -22,10 +22,12 @@ const MessagesHashtagError = {
 const MAX_COMMENT_LENGTH = 140;
 const commentErrorMessage = `Длина комментария не должна быть больше ${ MAX_COMMENT_LENGTH } символов.`;
 
+const DEFAULT_IMAGE_URL = 'img/upload-default-image.jpg';
 const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
 const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
 const scaleControlValue = imgUploadForm.querySelector('.scale__control--value');
 const imageUploadPreview = imgUploadForm.querySelector('.img-upload__preview img');
+
 const IMG_SCALE_BOTTOM = 0;
 const IMG_SCALE_TOP = 100;
 const IMG_SCALE_MIN = 25;
@@ -38,6 +40,7 @@ const imgUploadEffectLevel = imgUploadForm.querySelector('.img-upload__effect-le
 const effectLevelValue = imgUploadForm.querySelector('.effect-level__value');
 const effectLevelSlider = imgUploadForm.querySelector('.effect-level__slider');
 const effectsList = imgUploadForm.querySelector('.effects__list');
+const effectsPreviews = effectsList.querySelectorAll('.effects__preview');
 let currentEffect = 'none';
 const SliderEffects = {
   chrome: {
@@ -123,7 +126,6 @@ function validateHashtag (value) {
 
 const hashtagErrorMessageFunction = () => hashtagErrorMessage;
 
-// Валидируем поле хештега
 pristine.addValidator(textHashtagsInput, validateHashtag, hashtagErrorMessageFunction);
 
 //-- Валидация комментария
@@ -149,10 +151,23 @@ function onImgUploadFormSubmit (evt) {
 }
 
 //--- Раздел замены изображения "по умолчанию" в разделе превью, на загруженное пользователем.
-// const setNewUploadPreview = () => {
-//   imageUploadPreview.src = imgUploadInput.value;
-//   console.log(imgUploadInput.value);
-// };
+const setNewUploadPreview = () => {
+  const uploadFileName = imgUploadInput.files[0].name.toLowerCase();
+  if (fileIsImage(uploadFileName)) {
+    const uploadFileUrl = URL.createObjectURL(imgUploadInput.files[0]);
+    imageUploadPreview.src = uploadFileUrl;
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url("${uploadFileUrl}")`;
+    });
+  }
+};
+
+const setDefaultUploadPreview = () => {
+  imageUploadPreview.src = DEFAULT_IMAGE_URL;
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = `url("../${DEFAULT_IMAGE_URL}")`;
+  });
+};
 
 //--- Раздел изменения масштаба изображения
 const setScaleValue = (scaleValue) => {
@@ -270,10 +285,12 @@ const clearFormInputs = () => {
   textDescriptionInput.value = '';
   scaleCurrent = IMG_SCALE_DEFAULT;
   imgUploadInput.value = null;
+  pristine.reset();
 };
 
 function closeImageEditForm () {
   clearFormInputs ();
+  setDefaultUploadPreview();
   imgUploadOverlay.classList.add('hidden');
   unlockBodyScroll();
   removeCloseFormListeners();
@@ -287,7 +304,7 @@ function onCloseButtonClick () {
 }
 
 function onDocumentKeyDown (evt) {
-  if (evt.key === 'Escape') {
+  if (isEscapeKey(evt)) {
     if (!evt.target.matches('.text__hashtags') && !evt.target.matches('.text__description')) {
       evt.preventDefault();
       closeImageEditForm();
@@ -309,7 +326,7 @@ const addCloseFormListeners = () => {
 function onUploadInputChange () {
   showImageEditForm();
   addCloseFormListeners();
-  // setNewUploadPreview();
+  setNewUploadPreview();
   addImgScaleListeners ();
   setScaleValue(IMG_SCALE_DEFAULT);
   changeSliderEffect ('none');

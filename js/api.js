@@ -1,12 +1,14 @@
 //Модуль взаимодействия с сервером для загрузки фотографий других пользователей и отправки фотографий
-const getData = () => fetch(
-  'https://32.javascript.htmlacademy.pro/kekstagram/data')
+const GET_DATA_URL = 'https://32.javascript.htmlacademy.pro/kekstagram/data';
+const SEND_DATA_URL = 'https://32.javascript.htmlacademy.pro/kekstagram';
+const SEND_DATA_METHOD = 'POST';
+
+const getData = () => fetch(GET_DATA_URL)
   .then((response) => response.json());
 
-const sendData = (body) => fetch(
-  'https://32.javascript.htmlacademy.pro/kekstagram',
+const sendData = (body) => fetch(SEND_DATA_URL,
   {
-    method: 'POST',
+    method: SEND_DATA_METHOD,
     body,
   })
   .then((response) => {

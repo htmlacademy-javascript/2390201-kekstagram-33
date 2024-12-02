@@ -1,4 +1,5 @@
 // Модуль вывода сообщений для пользователя
+import { isEscapeKey } from './util';
 const DOWNLOAD_ALERT_SHOW_TIME = 5000;
 
 //---Вывод и удаление сообщения об успешной отправке фотографии
@@ -20,7 +21,7 @@ function onUploadSuccessButtonClick () {
 }
 
 function onUploadSuccessEscDown (evt) {
-  if (evt.key === 'Escape') {
+  if (isEscapeKey(evt)) {
     evt.preventDefault();
     closeUploadSuccessWindow();
   }
@@ -58,9 +59,8 @@ function onUploadErrorButtonClick () {
 }
 
 function onUploadErrorEscDown (evt) {
-  if (evt.key === 'Escape') {
+  if (isEscapeKey(evt)) {
     evt.preventDefault();
-    evt.stopPropagation();
     closeUploadErrorWindow();
   }
 }

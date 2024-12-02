@@ -29,6 +29,14 @@ const showThumbnails = (receivedPhotos) => {
   pictures.appendChild(picturesFragment);
 };
 
+// Функция удаляет с главной страницы все изображения миниатюр.
+const removeThumbnails = () => {
+  const addedPictures = pictures.querySelectorAll('.picture');
+  addedPictures.forEach((picture) => {
+    pictures.removeChild(picture);
+  });
+};
+
 //Обработчик клика по миниатюре (класс - picture__img), который вызывает окно просмотра изображения.
 const onMiniatureClick = (evt) => {
   if (evt.target.matches('.picture__img')) {
@@ -46,4 +54,4 @@ const onMiniatureClick = (evt) => {
 // Делегируем обработчик родительскому для picture контейнеру pictures
 pictures.addEventListener('click', onMiniatureClick);
 
-export {showThumbnails};
+export {showThumbnails, removeThumbnails};
