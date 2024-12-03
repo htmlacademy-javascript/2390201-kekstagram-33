@@ -252,10 +252,10 @@ const setSliderEffectParameters = (effect) => {
     },
     step: SliderEffects[effect].FILTER_STEP
   });
-  effectLevelSlider.noUiSlider.set(SliderEffects[effect].FILTER_MIN);
+  effectLevelSlider.noUiSlider.set(SliderEffects[effect].FILTER_MAX);
   //Параметры разметки
-  effectLevelValue.value = SliderEffects[effect].FILTER_MIN;
-  setSliderEffectStyle(effect, SliderEffects[effect].FILTER_MIN);
+  effectLevelValue.value = SliderEffects[effect].FILTER_MAX;
+  setSliderEffectStyle(effect, SliderEffects[effect].FILTER_MAX);
 };
 
 const changeSliderEffect = (effect) => {
