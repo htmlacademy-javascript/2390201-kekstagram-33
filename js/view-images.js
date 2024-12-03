@@ -1,8 +1,8 @@
 // Модуль просмотра изображений
-import {PHOTOS_QUANTITY, createPhotos} from './data.js';
+
 import {showBigPictureWindow} from './view-big-picture.js';
 
-const photos = createPhotos(PHOTOS_QUANTITY);
+let photos = [];//массив фотографий для отображения миниатюр, используется для передачи данных о фотографиях из showThumbnails в onMiniatureClick
 
 const pictures = document.querySelector('.pictures');
 
@@ -10,10 +10,11 @@ const newPictureTemplate = document.querySelector('#picture')
   .content
   .querySelector('.picture');
 
-// Функция showThumbnails отображает на главной странице миниатюры загруженных в массив photos изображений
-const showThumbnails = () => {
+// Функция showThumbnails отображает на главной странице миниатюры изображений, информация о которых содержится в массиве receivedPhotos
+const showThumbnails = (receivedPhotos) => {
   const picturesFragment = document.createDocumentFragment();
 
+  photos = receivedPhotos;
   photos.forEach((photo) => {
     const newPicture = newPictureTemplate.cloneNode(true);
     newPicture.dataset.id = photo.id;
@@ -26,6 +27,14 @@ const showThumbnails = () => {
   });
 
   pictures.appendChild(picturesFragment);
+};
+
+// Функция удаляет с главной страницы все изображения миниатюр.
+const removeThumbnails = () => {
+  const addedPictures = pictures.querySelectorAll('.picture');
+  addedPictures.forEach((picture) => {
+    pictures.removeChild(picture);
+  });
 };
 
 //Обработчик клика по миниатюре (класс - picture__img), который вызывает окно просмотра изображения.
@@ -45,4 +54,4 @@ const onMiniatureClick = (evt) => {
 // Делегируем обработчик родительскому для picture контейнеру pictures
 pictures.addEventListener('click', onMiniatureClick);
 
-export {showThumbnails};
+export {showThumbnails, removeThumbnails};
