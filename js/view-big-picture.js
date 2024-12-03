@@ -70,6 +70,7 @@ function loadCommentsPortion () {
   while ((commentsShownCount < currentPhoto.comments.length) && (commentsShownCount <= commentsLoadTopIndex)) {
     const newComment = commentTemplate.cloneNode(true);
     newComment.querySelector('.social__picture').src = currentPhoto.comments[commentsShownCount].avatar;
+    newComment.querySelector('.social__picture').alt = currentPhoto.comments[commentsShownCount].name;
     newComment.querySelector('.social__text').textContent = currentPhoto.comments[commentsShownCount].message;
     bigPictureComments.appendChild(newComment);
     commentsShownCount++;
