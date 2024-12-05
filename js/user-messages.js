@@ -49,7 +49,7 @@ const uploadErrorButton = uploadErrorMessage.querySelector('.error__button');
 
 const closeUploadErrorWindow = () => {
   uploadErrorButton.removeEventListener('click',onUploadErrorButtonClick);
-  document.removeEventListener('keydown', onUploadErrorEscDown);
+  document.body.removeEventListener('keydown', onUploadErrorEscDown);
   document.removeEventListener('click', onUploadErrorMouseCancel);
   uploadErrorMessage.remove();
 };
@@ -61,6 +61,7 @@ function onUploadErrorButtonClick () {
 function onUploadErrorEscDown (evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
+    evt.stopPropagation();
     closeUploadErrorWindow();
   }
 }
@@ -73,7 +74,7 @@ function onUploadErrorMouseCancel (evt) {
 
 const showUploadError = () => {
   uploadErrorButton.addEventListener('click',onUploadErrorButtonClick);
-  document.addEventListener('keydown', onUploadErrorEscDown);
+  document.body.addEventListener('keydown', onUploadErrorEscDown);
   document.addEventListener('click', onUploadErrorMouseCancel);
   document.body.append(uploadErrorMessage);
 };

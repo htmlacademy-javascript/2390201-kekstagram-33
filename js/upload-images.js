@@ -7,6 +7,12 @@ const imgUploadForm = document.querySelector('.img-upload__form');
 const imgUploadInput = imgUploadForm.querySelector('.img-upload__input');
 const imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
 const imgUploadCancelButton = imgUploadForm.querySelector('.img-upload__cancel');
+const imgUploadSubmitButton = imgUploadForm.querySelector('.img-upload__submit');
+
+const SubmitButtonText = {
+  IDLE: 'Сохранить',
+  SENDING: 'Сохраняю...'
+};
 
 const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
 const textDescriptionInput = imgUploadForm.querySelector('.text__description');
@@ -134,21 +140,6 @@ function validateComment (value) {
 }
 
 pristine.addValidator(textDescriptionInput, validateComment, commentErrorMessage);
-
-// Обработчик отправки формы
-function onImgUploadFormSubmit (evt) {
-  evt.preventDefault();
-  if (pristine.validate()) {
-    sendData(new FormData(evt.target))
-      .then(() => {
-        showUploadSuccess();
-        closeImageEditForm();
-      })
-      .catch(() => {
-        showUploadError();
-      });
-  }
-}
 
 //--- Раздел замены изображения "по умолчанию" в разделе превью, на загруженное пользователем.
 const setNewUploadPreview = () => {
@@ -309,6 +300,33 @@ function onDocumentKeyDown (evt) {
       evt.preventDefault();
       closeImageEditForm();
     }
+  }
+}
+
+const blockUploadSubmitButton = () => {
+  imgUploadSubmitButton.disabled = true;
+  imgUploadSubmitButton.textContent = SubmitButtonText.SENDING;
+};
+
+const unblockUploadSubmitButton = () => {
+  imgUploadSubmitButton.disabled = false;
+  imgUploadSubmitButton.textContent = SubmitButtonText.IDLE;
+};
+
+// Обработчик отправки формы
+function onImgUploadFormSubmit (evt) {
+  evt.preventDefault();
+  if (pristine.validate()) {
+    blockUploadSubmitButton();
+    sendData(new FormData(evt.target))
+      .then(() => {
+        showUploadSuccess();
+        closeImageEditForm();
+      })
+      .catch(() => {
+        showUploadError();
+      })
+      .finally(unblockUploadSubmitButton);
   }
 }
 
