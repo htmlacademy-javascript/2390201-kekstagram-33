@@ -92,9 +92,7 @@ let scaleCurrent = IMG_SCALE_DEFAULT;
 //--- Раздел валидации и отправки формы
 const pristine = new Pristine(imgUploadForm, {
   classTo: 'img-upload__field-wrapper',
-  // classTo: 'form__error',
   errorClass: 'img-upload__field-wrapper--error',
-  // successClass: 'form__item--valid',
   errorTextParent: 'img-upload__field-wrapper',
   errorTextTag: 'div',
   errorTextClass: 'form__error'

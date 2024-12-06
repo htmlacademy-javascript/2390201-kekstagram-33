@@ -1,4 +1,6 @@
 // Модуль вспомогательных утилит
+const FILE_TYPES = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']; //Типы графических файлов
+
 //Функция getRandomInteger возвращает случайное целое число в диапазоне от a до b
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -32,11 +34,7 @@ const debounce = (callback, timeoutDelay) => {
 };
 
 // Определяет, является ли файл картинкой
-const fileIsImage = (fileName) => {
-  const FILE_TYPES = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff'];
-  return FILE_TYPES.some((it) => fileName.endsWith(it));
-};
-
+const fileIsImage = (fileName) => FILE_TYPES.some((it) => fileName.endsWith(it));
 
 //--- Управление прокруткой контейнера с миниатюрами позади окна изображения
 //Запрещает прокрутку
