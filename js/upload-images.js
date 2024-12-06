@@ -3,16 +3,13 @@ import {isEscapeKey, fileIsImage, lockBodyScroll, unlockBodyScroll} from './util
 import {sendData} from './api.js';
 import {showUploadError, showUploadSuccess} from './user-messages.js';
 
-const imgUploadForm = document.querySelector('.img-upload__form');
-const imgUploadInput = imgUploadForm.querySelector('.img-upload__input');
-const imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
-const imgUploadCancelButton = imgUploadForm.querySelector('.img-upload__cancel');
+const SubmitButtonText = {
+  IDLE: 'Сохранить',
+  SENDING: 'Сохраняю...'
+};
 
-const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
-const textDescriptionInput = imgUploadForm.querySelector('.text__description');
-let hashtagErrorMessage = '';
 const MAX_HASHTAGS_NUMBER = 5;
-const hashtagTemplate = /^#[a-zа-яё0-9]{0,19}$/i;
+const HASHTAG_TEMPLATE = /^#[a-zа-яё0-9]{0,19}$/i;
 const MessagesHashtagError = {
   DUPLICATE: 'Один и тот же хэштег не может быть использован дважды, при этом хэштеги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом',
   BAD_FORMAT: 'Хэштег начинается с символа # (решётка). Строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д. Минимальная длина хэштега - 2 символа, включая решётку, максимальная - 20',
@@ -20,13 +17,9 @@ const MessagesHashtagError = {
   TOO_MANY: `Хэштегов не должно быть больше ${ MAX_HASHTAGS_NUMBER }`
 };
 const MAX_COMMENT_LENGTH = 140;
-const commentErrorMessage = `Длина комментария не должна быть больше ${ MAX_COMMENT_LENGTH } символов.`;
+const COMMENT_ERROR_MESSAGE = `Длина комментария не должна быть больше ${ MAX_COMMENT_LENGTH } символов.`;
 
 const DEFAULT_IMAGE_URL = 'img/upload-default-image.jpg';
-const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
-const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
-const scaleControlValue = imgUploadForm.querySelector('.scale__control--value');
-const imageUploadPreview = imgUploadForm.querySelector('.img-upload__preview img');
 
 const IMG_SCALE_BOTTOM = 0;
 const IMG_SCALE_TOP = 100;
@@ -34,14 +27,6 @@ const IMG_SCALE_MIN = 25;
 const IMG_SCALE_MAX = 100;
 const IMG_SCALE_DEFAULT = 100;
 const IMG_SCALE_STEP = 25;
-let scaleCurrent = IMG_SCALE_DEFAULT;
-
-const imgUploadEffectLevel = imgUploadForm.querySelector('.img-upload__effect-level');
-const effectLevelValue = imgUploadForm.querySelector('.effect-level__value');
-const effectLevelSlider = imgUploadForm.querySelector('.effect-level__slider');
-const effectsList = imgUploadForm.querySelector('.effects__list');
-const effectsPreviews = effectsList.querySelectorAll('.effects__preview');
-let currentEffect = 'none';
 const SliderEffects = {
   chrome: {
     FILTER_NAME:'grayscale',
@@ -80,6 +65,30 @@ const SliderEffects = {
   },
 };
 
+const imgUploadForm = document.querySelector('.img-upload__form');
+const imgUploadInput = imgUploadForm.querySelector('.img-upload__input');
+const imgUploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
+const imgUploadCancelButton = imgUploadForm.querySelector('.img-upload__cancel');
+const imgUploadSubmitButton = imgUploadForm.querySelector('.img-upload__submit');
+
+const textHashtagsInput = imgUploadForm.querySelector('.text__hashtags');
+const textDescriptionInput = imgUploadForm.querySelector('.text__description');
+let hashtagErrorMessage = '';
+
+const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
+const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
+const scaleControlValue = imgUploadForm.querySelector('.scale__control--value');
+const imageUploadPreview = imgUploadForm.querySelector('.img-upload__preview img');
+
+const imgUploadEffectLevel = imgUploadForm.querySelector('.img-upload__effect-level');
+const effectLevelValue = imgUploadForm.querySelector('.effect-level__value');
+const effectLevelSlider = imgUploadForm.querySelector('.effect-level__slider');
+const effectsList = imgUploadForm.querySelector('.effects__list');
+const effectsPreviews = effectsList.querySelectorAll('.effects__preview');
+const originalEffectButton = imgUploadForm.querySelector('[value="none"]');
+let currentEffect = 'none';
+let scaleCurrent = IMG_SCALE_DEFAULT;
+
 //--- Раздел валидации и отправки формы
 const pristine = new Pristine(imgUploadForm, {
   classTo: 'img-upload__field-wrapper',
@@ -106,7 +115,7 @@ function validateHashtag (value) {
         hashtagsDuplicate = true; //Поймали совпадение хештегов
         hashtagErrorMessage = MessagesHashtagError.DUPLICATE;
       }
-      if (!hashtagTemplate.test(hashtag)) {
+      if (!HASHTAG_TEMPLATE.test(hashtag)) {
         hashtagFormatIsWrong = true; // Поймали несоответствие шаблону
         hashtagErrorMessage = MessagesHashtagError.BAD_FORMAT;
       }
@@ -133,22 +142,7 @@ function validateComment (value) {
   return value.length <= MAX_COMMENT_LENGTH;
 }
 
-pristine.addValidator(textDescriptionInput, validateComment, commentErrorMessage);
-
-// Обработчик отправки формы
-function onImgUploadFormSubmit (evt) {
-  evt.preventDefault();
-  if (pristine.validate()) {
-    sendData(new FormData(evt.target))
-      .then(() => {
-        showUploadSuccess();
-        closeImageEditForm();
-      })
-      .catch(() => {
-        showUploadError();
-      });
-  }
-}
+pristine.addValidator(textDescriptionInput, validateComment, COMMENT_ERROR_MESSAGE);
 
 //--- Раздел замены изображения "по умолчанию" в разделе превью, на загруженное пользователем.
 const setNewUploadPreview = () => {
@@ -295,6 +289,7 @@ function closeImageEditForm () {
   unlockBodyScroll();
   removeCloseFormListeners();
   removeImgScaleListeners ();
+  originalEffectButton.checked = true;
   effectsList.removeEventListener('click', onEffectButtonClick);
   imgUploadForm.removeEventListener('submit', onImgUploadFormSubmit);
 }
@@ -309,6 +304,33 @@ function onDocumentKeyDown (evt) {
       evt.preventDefault();
       closeImageEditForm();
     }
+  }
+}
+
+const blockUploadSubmitButton = () => {
+  imgUploadSubmitButton.disabled = true;
+  imgUploadSubmitButton.textContent = SubmitButtonText.SENDING;
+};
+
+const unblockUploadSubmitButton = () => {
+  imgUploadSubmitButton.disabled = false;
+  imgUploadSubmitButton.textContent = SubmitButtonText.IDLE;
+};
+
+// Обработчик отправки формы
+function onImgUploadFormSubmit (evt) {
+  evt.preventDefault();
+  if (pristine.validate()) {
+    blockUploadSubmitButton();
+    sendData(new FormData(evt.target))
+      .then(() => {
+        showUploadSuccess();
+        closeImageEditForm();
+      })
+      .catch(() => {
+        showUploadError();
+      })
+      .finally(unblockUploadSubmitButton);
   }
 }
 
