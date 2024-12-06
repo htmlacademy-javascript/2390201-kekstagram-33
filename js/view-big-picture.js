@@ -1,6 +1,8 @@
 // Модуль открытия окна просмотра изображения по клику на миниатюре, и закрытия этого окна (задания 8.14, 8.15)
 import {isEscapeKey, lockBodyScroll, unlockBodyScroll} from './util.js';
 
+const COMMENTS_SHOWN_PORTION = 5; //Сколько комментариев выводим по кнопке "Загрузить ещё"
+
 const bigPicture = document.querySelector('.big-picture');
 const bigPictureImage = bigPicture.querySelector('.big-picture__img img');
 const bigPictureCaption = bigPicture.querySelector('.social__caption');
@@ -13,7 +15,6 @@ const commentsShownSpan = bigPicture.querySelector('.social__comment-shown-count
 const commentsTotalSpan = bigPicture.querySelector('.social__comment-total-count');
 const commentsLoaderButton = bigPicture.querySelector('.comments-loader');
 let commentsShownCount = 0;
-const commentsShownPortion = 5; //Сколько комментариев выводим по кнопке "Загрузить ещё"
 let currentPhoto = null; //объект с данными по текущему фото для передачи в обработчик добавления комментариев по кнопке
 
 const commentTemplate = document.querySelector('#comment')
@@ -64,9 +65,9 @@ const showCommentsLoaderButton = () =>{
   commentsLoaderButton.classList.remove('hidden');
 };
 
-//Загружает на страницу очередную порцию комментариев в количестве commentsShownPortion из массива currentPhoto.comments
+//Загружает на страницу очередную порцию комментариев в количестве COMMENTS_SHOWN_PORTION из массива currentPhoto.comments
 function loadCommentsPortion () {
-  const commentsLoadTopIndex = commentsShownCount + commentsShownPortion - 1;
+  const commentsLoadTopIndex = commentsShownCount + COMMENTS_SHOWN_PORTION - 1;
   while ((commentsShownCount < currentPhoto.comments.length) && (commentsShownCount <= commentsLoadTopIndex)) {
     const newComment = commentTemplate.cloneNode(true);
     newComment.querySelector('.social__picture').src = currentPhoto.comments[commentsShownCount].avatar;
